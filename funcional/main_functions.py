@@ -22,34 +22,35 @@ def error(e):
     arquivo.close()
 
 
-def create_driver(download_dir=None, headless=False):
+def create_chrome_driver_with_manager(download_dir=None, headless=False):
     """
-    import os
     from selenium import webdriver
-    from selenium.webdriver.chrome.service import Service
-    from webdriver_manager.chrome import ChromeDriverManager
+    from selenium.webdriver.common.by import By
+    Cria um WebDriver do Chrome usando o Selenium Manager.
 
-    It creates a Chrome webdriver with the specified options.
-
-    :param download_dir: The directory where you want to download the files to
-    :param headless: If True, the browser will run in headless mode, defaults to False (optional)
-    :return: A webdriver object
+    :param download_dir: Diretório onde você deseja baixar os arquivos
+    :param headless: Se True, o navegador será executado em modo headless, padrão é False
+    :return: Objeto WebDriver
     """
     chrome_options = webdriver.ChromeOptions()
-    prefs = {
-        "download.default_directory": 'PATH',
-        "download.prompt_for_download": False,
-        "download.directory_upgrade": True,
-        "plugins.always_open_pdf_externally": True
-    }
-    chrome_install = ChromeDriverManager().install()
 
-    folder = os.path.dirname(chrome_install)
-    chromedriver_path = os.path.join(folder, "chromedriver.exe")
+    # Configurações de download
+    if download_dir:
+        prefs = {
+            "download.default_directory": download_dir,
+            "download.prompt_for_download": False,
+            "download.directory_upgrade": True,
+            "plugins.always_open_pdf_externally": True
+        }
+        chrome_options.add_experimental_option("prefs", prefs)
 
-    service = Service(chromedriver_path)
-    chrome_options.add_experimental_option("prefs", prefs)
-    return webdriver.Chrome(service=service, options=chrome_options)
+    # Modo headless
+    if headless:
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--disable-gpu")
+
+    # O Selenium Manager gerencia automaticamente o ChromeDriver
+    return webdriver.Chrome(options=chrome_options)
 
 
 def clicking(path, driver, element='elemento selecionado', refresh=False, by=By.XPATH, limit=3, wait=True):
